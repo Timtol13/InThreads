@@ -1,29 +1,41 @@
-import React, {useState, useEffect} from 'react'
+import {useState, useEffect} from 'react'
 import { PostsAPI } from '../api/api'
 import './UsersNews.scss'
+import { io } from 'socket.io-client'
 
 const UsersNews = (props) => {
     const { user, name, surname } = props
     const [posts, setPosts] = useState([])
+    const socket = io('ws://localhost:7653');
+    socket.on('newLike', (data) => {
+      PostsAPI.getPosts().then(e => {setPosts(e.data)})
+    })
     useEffect(() => {
         PostsAPI.getPosts().then(e => {setPosts(e.data)})
       }, [])
+
+      const like = (id, login) => {
+        socket.emit('likePost', {'id': id, 'login': login})
+      }
+      const dislike = (id, login) => {
+        socket.emit('dislikePost', {'id': id, 'login': login})
+      }
+      // useEffect(() => {
+      //   posts?.map(el => {
+      //     if(el.like.includes(user)) setLikedPosts(prev => [...prev, el.id])
+      //   })
+      // }, [posts])
   return (
     <div className={'UsersPost'}>
         {posts? posts.sort((a, b) => a.id - b.id).filter(item => item.login === user).map(el => {
-            let likee = el.like.length
+            console.log(el);
             return (
               <div className={'post'}>
-                <h2>{name} {surname}</h2>
+                <h2>{el.name} {el.surname}</h2>
                 <p>{el.description}</p>
                 <img src={`http://localhost:7653/images/posts/${el.photo}`} alt={''}/>
                 <button onClick={() => {
-                    el.like?.includes(user)? PostsAPI.unlike({'id': el.id, 'login': user}).then(() => {
-                      PostsAPI.getPosts().then(e => {setPosts(e.data)})
-                    }) : PostsAPI.like({'id': el.id, 'login': user}).then(() => {
-                      PostsAPI.getPosts().then(e => {setPosts(e.data)})
-                    })
-                    
+                    el.like?.includes(user)? dislike(el.id, user) : like(el.id, user)
                   }}>
                   <svg fill={el.like?.includes(user) ? '#ff0000': '#000000'} height="40px" width="40px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" link="http://www.w3.org/1999/xlink" 
                     viewBox="0 0 471.701 471.701" >

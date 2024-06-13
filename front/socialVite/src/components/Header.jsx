@@ -13,6 +13,7 @@ export const Header = () => {
     const logoutHandler = () => {
         localStorage.setItem('isLoggin', 'false')
         localStorage.setItem('user', JSON.stringify({}))
+        window.location.replace('/login')
     }
     useEffect(() => {
         const socket = io('ws://localhost:7653');
@@ -64,10 +65,11 @@ export const Header = () => {
         };
     }, [])
     
+    console.log(window.location.pathname);
     return (
         <>  
             {
-            logg === 'true' &&
+            logg === 'true' & window.location.pathname != '/admin' &&
                 <div className='header'>
                     <nav>
                         <ul>

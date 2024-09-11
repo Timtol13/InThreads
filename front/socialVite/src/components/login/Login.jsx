@@ -1,32 +1,29 @@
 import React, {useState} from 'react'
 import {useFormik} from 'formik'
 import './Login.modul.scss'
-import { authAPI } from '../api/api'
 import {Helmet} from "react-helmet";
+import { useDispatch, useSelector } from 'react-redux'
+import { login as loginAction } from '../../redux/action/action';
+import { message } from 'antd';
 
 function Login() {
-    const [error, setError] = useState()
+    const dispatch = useDispatch();
+    const { login, loading, error } = useSelector((state) => state.user)
     const formik = useFormik({
         initialValues:{
-            'login': '',
-            'password': ''
+            login: '',
+            password: ''
         },
         onSubmit: (values) => {
-            authAPI.login(values.login, values.password)
-            .catch((e) => {
-                setError("Неверный логин или пароль");
-                return Promise.reject(e);
-            })
-            .then((res) => {
-                localStorage.setItem('isLoggin', 'true')
-                localStorage.setItem('user', JSON.stringify({'login': res.data}))
-                window.location.replace(`/profile/${values.login}`)
-            })
-            .catch((error) => {
-                console.error(error);
-            }); 
+            dispatch(loginAction(values.login, values.password));
         }
     })
+    if (loading){
+        console.log('Please wait')
+    }
+
+    error && message.error(error)
+
     return (
         <div className='divLogin'>
             <Helmet>
@@ -37,8 +34,9 @@ function Login() {
                 <h1>С возвращением!</h1>
                 <input placeholder={'Логин'} {...formik.getFieldProps('login')}/>
                 <input placeholder={'Пароль'} type={'password'} {...formik.getFieldProps('password')}/>
-                {error? error : ''}
-                <button type={'submit'}>Войти</button>
+                <button type={'submit'} disabled={loading}>
+                    {loading ? 'Вход...' : 'Войти'}
+                </button>
                 <h5>Ещё нет аккаунта? <a href={'/registration'}>Зарегестрируйтесь!</a></h5>
             </form>
         </div>

@@ -70,9 +70,10 @@ const Photo = () => {
     }
 
     socket.on('getComments', (data) => {
+        console.log(data)
         authAPI.getUserPhotoes(login).then((e) => {
             setUserPhotoes(e.data)
-        })
+        });
     })
 
     useEffect(() => {
@@ -89,19 +90,25 @@ const Photo = () => {
       
         return `${day}/${month}/${year} ${hours}:${minutes}`;
     }
-    const sendComment = () => {
+    const sendComment = async () => {
         const currentDateTime = new Date();
         const data = {
-            'name': user.username,
-            'surname': user.surname,
-            'message': value,
-            'date': formatDate(currentDateTime),
-            'login': login,
-            'filename': filename?.filename
-        }
-        setValue('')
-        socket.emit('commentPhoto', data)
-    }
+          'name': user.username,
+          'surname': user.surname,
+          'message': value,
+          'date': formatDate(currentDateTime),
+          'login': login,
+          'filename': filename?.filename
+        };
+        
+        setValue('');
+        socket.emit('commentPhoto', data);
+        authAPI.getUserPhotoes(login).then((e) => {
+          const updatedPhotos = e.data;
+          setUserPhotoes(updatedPhotos);
+          setFilename(updatedPhotos[index]);
+        });
+      };
     // const getMargin = (i) => {
     //     var marginPrev = 0
     //     try{
@@ -231,6 +238,7 @@ const Photo = () => {
                                             marginRight: '0',
                                             borderRadius:'5px 0 0 5px'
                                         }}
+                                        value={value}
                                         onChange={(e) => {setValue(e.target.value);}}
                                         />
                                         <Button style={{

@@ -65,11 +65,10 @@ export const Header = () => {
         };
     }, [])
     
-    console.log(window.location.pathname);
     return (
         <>  
             {
-            logg === 'true' & window.location.pathname != '/admin' &&
+            logg === 'true' & window.location.pathname != '/admin'?
                 <div className='header'>
                     <nav>
                         <ul>
@@ -80,11 +79,14 @@ export const Header = () => {
                             <li><Link className={'button'} to={'/messenger'}> <img src={'/Message.png'} alt={'Oops'} width={20} height={20} /><h5>Сообщения</h5></Link></li>
                             <li><Link className={'button'} to={`/photos/${me.login}`}><img src={'/Photo.png'} alt={'Oops'} height={20} /><h5>Фото</h5></Link></li>
                             <li><Link className={'button Exit'} onClick={logoutHandler}><img src={'/cross.png'} alt={'Oops'}  width={20} height={20}/><h5>Выйти из уч. записи</h5></Link></li>
+                            {me.login === 'admin' ? <li onClick={() => window.location.reload()}><Link className={'button'} to={`/admin`}><img src={'/profile.png'} alt={'Oops'} height={20} /><h5>Admin</h5></Link></li> : <></>}
                         </ul>
                     <a href={'/'} className='headerLogo'><img src={'/logoText.png'} width={80} height={80} style={{marginTop: -30}}/></a>
                     </nav>
                     {notification? <a href={`/chat/${notification.login}`} className={'notification'}><h2>{notification.name} {notification.surname}</h2><h3>{notification.message}</h3></a>: ''}
                 </div>  
+                : 
+                <></>
             }
         </>
     )

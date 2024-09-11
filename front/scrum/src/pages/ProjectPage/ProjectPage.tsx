@@ -10,7 +10,7 @@ import TaskIcon from '@/images/tasks.png'
 import Image from 'next/image'
 import { handleDelete, handleSetComplited, handleSetInWork, handleSetPostponed, handleUpdateUser } from './functions'
 import Link from 'next/link'
-import { filterOption, filterOptionCreate, formikCreateTaskFunc } from '@/shared/functions'
+import { filterOption, filterOptionCreate, useFormikCreateTask } from '@/shared/functions'
 import { ProjectType, TaskType } from '@/shared/types'
 
 
@@ -90,7 +90,7 @@ export default function ProjectPage() {
   const [formikExecutor, setFormikExecutor] = useState(0)
   const [formikStatus, setFormikStatus] = useState('')
 
-  const formikCreateTask = formikCreateTaskFunc({projectData, formikExecutor, formikStatus})
+  const formikCreateTask = useFormikCreateTask({projectData, formikExecutor, formikStatus})
 
   const onChangeTabs = (e:any) => {
       setSelectedTab(e);
@@ -112,17 +112,16 @@ export default function ProjectPage() {
         label: <h1>Все</h1>,
         children: <div className={styles.taskList}>
           {tasks?.map((el:TaskType) => {
-            return <div className={styles.task} key={el.id}  id='task'>
+            return <div className={styles.task} key={el.id} id='task' onMouseDown={() => {
+              setSelectedTaskHook(el.id)
+              selectedTask = el.id
+            }}>
               <Image src={TaskIcon} alt={'task'} width={40}/>
               
               <Dropdown 
-              overlay={dropDownItems} 
-              placement="bottomLeft" 
-              value={el.id} 
-              onMouseEnter={(e:any) => {
-                setSelectedTaskHook(el.id)
-                selectedTask = el.id
-              }}>
+                overlay={dropDownItems} 
+                placement="bottomLeft" 
+              >
                 <button className={styles.dots}>
                   <div className={styles.dot}></div>
                   <div className={styles.dot}></div>
@@ -167,8 +166,8 @@ export default function ProjectPage() {
         key: '2',
         label: <h1>Выполнены</h1>,
         children: <div key="2" className={styles.taskList}>
-        {tasks?.filter((item:TaskType) => item.status.toLowerCase() === 'completed').map((el:TaskType) => {
-          return <div className={styles.task}  id='task'>
+        {tasks?.filter((item:TaskType) => item.status.toLowerCase() === 'completed').map((el:TaskType, index:number) => {
+          return <div className={styles.task} key={index}  id='task'>
             <Image src={TaskIcon} alt={'task'} width={40}/>
             
             <Dropdown overlay={dropDownItems} placement="bottomLeft">
@@ -191,8 +190,8 @@ export default function ProjectPage() {
         key: '3',
         label: <h1>Отложены</h1>,
         children: <div key="3" className={styles.taskList}>
-        {tasks?.filter((item:TaskType) => item.status.toLowerCase() === 'postponed').map((el:TaskType) => {
-          return <div className={styles.task}  id='task'>
+        {tasks?.filter((item:TaskType) => item.status.toLowerCase() === 'postponed').map((el:TaskType, index:number) => {
+          return <div className={styles.task} key={index} id='task'>
             <Image src={TaskIcon} alt={'task'} width={40}/>
             <Dropdown overlay={dropDownItems} placement="bottomLeft">
               <button className={styles.dots} value={el.id}>
@@ -313,6 +312,7 @@ export default function ProjectPage() {
           open={openModal}
           closable
           onCancel={handleToggleCloseModal}
+          title="Добавление пользователя"
           onOk={() => handleOkToAddUser()}
         >
           <Select style={{ width: '100%', marginTop: '50px' }} showSearch filterOption={filterOption} mode="tags" className={styles.fromChild} options={users}  onChange={selectedValues => {

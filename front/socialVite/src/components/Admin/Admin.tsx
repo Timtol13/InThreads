@@ -13,7 +13,7 @@ type UserType = {
 export const Admin = () => {
   const [users, setUsers] = useState<UserType[]>([])
 
-  if(!JSON.parse(localStorage.getItem('user'))?.login?.login || JSON.parse(localStorage.getItem('user'))?.login?.login !== 'admin') window.location.replace('/')
+  if(!JSON.parse(localStorage.getItem('user') || '{}')?.login?.login || JSON.parse(localStorage.getItem('user') || '{}')?.login?.login !== 'admin') window.location.replace('/')
   useEffect(() => {
     authAPI.getAllUsers().then(e => setUsers(e.data))
   }, [])

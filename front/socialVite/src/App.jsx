@@ -21,7 +21,7 @@ export const App = () => {
     <div className="App" >
       <React.Suspense fallback={<Loader/>}>
         <div className={'container'}>
-          {usr && <Header />}
+          {usr ? <Header /> : <></>}
           <div>
             <Routes>
                 <Route path={'/admin'} element={<Admin />} />
@@ -33,6 +33,7 @@ export const App = () => {
                 <Route path={'/peoples'} element={<Peoples />} />
                 <Route path={'/chat/:login'} element={<Chat />} />
                 <Route path={'/photos/:login'} element={<Photo />} />
+                <Route path='*' element={<PageNotFound />} />
             </Routes>
           </div>
           <a target='_blank' href={`http://localhost:8014/${login}`} className={'linkToInProjects'}><img src={'/logoScrum.png'} alt=""/></a>
@@ -40,4 +41,9 @@ export const App = () => {
       </React.Suspense>
     </div>
   )
+}
+
+const PageNotFound = () => {
+  window.location.replace('/')
+  return <></>
 }

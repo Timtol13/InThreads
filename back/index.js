@@ -7,6 +7,7 @@ const { Pool } = require('pg');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const morgan = require('morgan')
 
 const port = 7653
 
@@ -41,34 +42,36 @@ app.use(
         origin: ['http://localhost:3000', 'http://localhost:8014', 'http://localhost:5173']
     })
 )
+app.use(morgan('dev'));
 
 
-app.post('/registration', (req, res) => {
-    const body = req.body
-    const query = `INSERT INTO users (login, password, username, surname, description) VALUES ($1, $2, $3, $4, $5)`;
-    const values = [body.login, body.password, body.name, body.surname, body.description];
-    let check
-    db.query(`SELECT login FROM users WHERE login = $1`, [body.login], (err, result) =>{
-      if(err){
-        res.status(404).send('Ошибка!')
+app.post('/registration', async (req, res) => {
+  const { login, password, name, surname, description } = req.body;
+  const insertQuery = `
+      INSERT INTO users (login, password, username, surname, description)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *;
+  `;
+  const selectQuery = `SELECT * FROM users WHERE login = $1`;
+  const values = [login, password, name, surname, description];
+
+  try {
+      const selectResult = await db.query(selectQuery, [login]);
+      if (selectResult.rows.length > 0) {
+          return res.status(400).send('Пользователь уже существует!');
       }
-      else if( result.rows[0] ){
-        res.status(404).send('Пользователь уже существует!')
-      } else {
-        db.query(query, values, (err, result) => { 
-          if (err) {
-            console.error(err);
-            console.log('Error saving user to database');
-          } else {
-            res.status(200).send('OK')
-            console.log(`User saved to database`);
-          }
-        });
-      }
-    })
+
+      const insertResult = await db.query(insertQuery, values);
+      const user = insertResult.rows[0];
+
+      res.json(user);
+  } catch (err) {
+      console.error(err);
+      res.status(500).send('Ошибка при обработке запроса');
+  }
+});
 
 
-})
 
 app.get('/get-user/:id', (req, res) => {
   const { id } = req.params
@@ -395,6 +398,23 @@ app.get('/getPosts/:login', (req, res) => {
     }
   });
 });
+
+app.delete('/deletePost/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'DELETE FROM posts WHERE id = $1';
+
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Ошибка при удалении записи из базы данных');
+    } else if (result.rowCount === 0) {
+      res.status(404).send('Запись не найдена');
+    } else {
+      res.send('Запись успешно удалена');
+    }
+  });
+});
+
 
 
 // app.put('/like', (req, res) => {

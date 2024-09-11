@@ -1,5 +1,6 @@
 import {useState, useEffect} from 'react'
 import { PostsAPI } from '../api/api'
+import { Button, Dropdown, Menu, message } from 'antd';
 import './UsersNews.scss'
 import { io } from 'socket.io-client'
 
@@ -25,13 +26,30 @@ const UsersNews = (props) => {
       //     if(el.like.includes(user)) setLikedPosts(prev => [...prev, el.id])
       //   })
       // }, [posts])
+      const menu = (
+        <Menu>
+          <Menu.Item key="1">
+            <Button onClick={() => handleDeletePost()}>Удалить пост</Button>
+          </Menu.Item>
+        </Menu>
+      );
+      const [ postId, setPostId ] = useState()
+      const handleDeletePost = () => {
+        PostsAPI.removePost(postId)
+        .then(() => {
+          message.success('Пост успешно удалён!')
+          setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+        })
+        .catch(() => {
+          message.error('Упс! Кажется что-то пошло не так')
+        })
+      }
   return (
     <div className={'UsersPost'}>
         {posts? posts.sort((a, b) => a.id - b.id).filter(item => item.login === user).map(el => {
-            console.log(el);
             return (
-              <div className={'post'}>
-                <h2>{el.name} {el.surname}</h2>
+              <div className={'post'} onMouseEnter={() => setPostId(el.id)}>
+                <div><h2>{el.name} {el.surname}</h2><Dropdown overlay={menu} trigger={['click']}><Button>...</Button></Dropdown></div>
                 <p>{el.description}</p>
                 <img src={`http://localhost:7653/images/posts/${el.photo}`} alt={''}/>
                 <button onClick={() => {

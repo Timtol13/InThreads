@@ -1,16 +1,7 @@
-export function createStore (rootReducer, initialState){
-    let state = rootReducer(initialState, {type: "__INIT__"})
-    const subscribers = []
-    return {
-        dispatch(action){
-            state = rootReducer(state, action)
-            subscribers.forEach(sub => sub())
-        },
-        subscribe(callback){
-            subscribers.push(callback)
-        },
-        getState(){
-            return state
-        }
-    }
-}
+import { createStore, applyMiddleware } from 'redux';
+import {thunk} from 'redux-thunk';
+import rootReducer from '../reducers/rootReducer';
+
+const store = createStore(rootReducer, applyMiddleware(thunk));
+
+export default store;

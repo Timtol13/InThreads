@@ -24,7 +24,7 @@ export default function RootLayout({
     <html lang="ru">
       <body className={`${inter.className} ${styles.app}`}>
         <React.Suspense fallback={<Loader />}>
-          <Link target='_blank' href={'http://localhost:3000/'} className={styles.linkToInThreads}><Image src={Logo} alt=""/></Link>
+          <Link target='_blank' href={'http://localhost:5173/'} className={styles.linkToInThreads}><Image src={Logo} alt=""/></Link>
           {children}
         </React.Suspense>
       </body>

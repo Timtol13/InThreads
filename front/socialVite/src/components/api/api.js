@@ -63,6 +63,9 @@ export const PostsAPI = {
     createPost({ login, name, surname, description, photo }){
         return instancePhoto.post('/createPost', { login, name, surname, description, photo })
     },
+    removePost(id){
+        return instance.delete(`/deletePost/${id}`)
+    }
     // like({id, login}){
     //     return instance.put('/like', {id, login})
     // },

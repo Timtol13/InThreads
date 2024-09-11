@@ -3,9 +3,14 @@ import {useFormik} from 'formik'
 import { authAPI } from '../api/api'
 import './Registration.modul.scss'
 import { Helmet } from 'react-helmet'
+import { useDispatch, useSelector } from 'react-redux'
+import { registration } from '../../redux/action/action'
+import { message } from 'antd'
 
 const Registration = () => {
-    const [error, setError] = useState()
+    // const [error, setError] = useState()
+    const dispatch = useDispatch()
+    const { loading, error, login } = useSelector((state) => state.user)
     const formik = useFormik({
         initialValues:{
             'login': '',
@@ -15,20 +20,16 @@ const Registration = () => {
             'description': '',
         },
         onSubmit: (values) => {
-            authAPI.registration(values)
-        .catch((e) => {
-            setError(e.response.data);
-            return Promise.reject(e);
-        })
-        .then((res) => {
-            console.log(res);
-            window.location.replace(`/login`);
-        })
-        .catch((error) => {
-            console.error(error);
-        }); 
+            dispatch(registration(values))
         }
     })
+    if (loading) {
+        console.log(loading);
+    }
+    if (error){
+        message.error(error)
+    }
+    console.log(login);
     return (
         <div className='divRegistration'>
             <Helmet>
@@ -44,8 +45,9 @@ const Registration = () => {
                 <input placeholder={'Name'} type={'text'} {...formik.getFieldProps('name')}/>
                 <input placeholder={'Surname'} type={'text'} {...formik.getFieldProps('surname')}/>
                 <textarea placeholder={'Description'} {...formik.getFieldProps('description')}/>
-                {error? error : ''}
-                <button type={'submit'}>Зарегестрироваться</button>
+                <button type={'submit'} disabled={loading}>
+                    {loading ? 'Подождите....' : 'Зарегестрироваться'}
+                </button>
                 <h>Уже есть аккаунт? <a href={'/login'}>Войдите!</a></h>
             </form>
         </div>
